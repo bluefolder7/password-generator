@@ -1,0 +1,2496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:;">
+    <title>Air-Gapped Password Generator Pro</title>
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a25;
+            --bg-hover: #22222f;
+            --accent: #6366f1;
+            --accent-hover: #818cf8;
+            --accent-dim: rgba(99, 102, 241, 0.15);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border: #2a2a3a;
+            --border-hover: #3a3a4a;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --radius: 12px;
+            --radius-sm: 8px;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+            --transition: 0.2s ease;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1.5rem 1rem;
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .security-badges {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            padding: 0.35rem 0.75rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 0.25rem;
+            margin-bottom: 1rem;
+            gap: 0.25rem;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 0.625rem 1rem;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+        }
+
+        .tab:hover {
+            color: var(--text-primary);
+            background: var(--bg-tertiary);
+        }
+
+        .tab.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Password Display */
+        .password-display {
+            position: relative;
+            background: var(--bg-primary);
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            transition: border-color var(--transition);
+        }
+
+        .password-display:focus-within,
+        .password-display:hover {
+            border-color: var(--accent);
+        }
+
+        .password-text {
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 1.1rem;
+            word-break: break-all;
+            flex: 1;
+            color: var(--text-primary);
+            letter-spacing: 0.5px;
+            line-height: 1.5;
+        }
+
+        .password-text.masked {
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+        }
+
+        .password-actions {
+            display: flex;
+            gap: 0.375rem;
+            margin-left: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .icon-btn {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            font-size: 1rem;
+        }
+
+        .icon-btn:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .icon-btn:active {
+            transform: scale(0.95);
+        }
+
+        .icon-btn.active {
+            background: var(--accent-dim);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* Strength Meter */
+        .strength-section {
+            margin-bottom: 1rem;
+        }
+
+        .strength-bar-container {
+            display: flex;
+            gap: 3px;
+            margin-bottom: 0.5rem;
+        }
+
+        .strength-segment {
+            flex: 1;
+            height: 6px;
+            background: var(--bg-primary);
+            border-radius: 3px;
+            transition: background var(--transition);
+        }
+
+        .strength-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+        }
+
+        .strength-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .strength-text {
+            font-weight: 600;
+        }
+
+        .entropy-badge {
+            background: var(--bg-tertiary);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .crack-time {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 0.5rem;
+        }
+
+        .generate-btn {
+            padding: 0.875rem 1.5rem;
+            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+
+        .bulk-btn {
+            padding: 0.875rem;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .bulk-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border-color: var(--border-hover);
+        }
+
+        /* Options Grid */
+        .options-grid {
+            display: grid;
+            gap: 0.875rem;
+        }
+
+        .option-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .option-label {
+            display: flex;
+            flex-direction: column;
+            gap: 0.125rem;
+            flex: 1;
+        }
+
+        .option-title {
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        .option-desc {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        /* Length Control */
+        .length-control {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex: 1;
+            max-width: 200px;
+        }
+
+        .length-input {
+            width: 55px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 0.5rem;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .length-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: var(--bg-primary);
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--accent);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform var(--transition);
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: var(--accent);
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* Toggle Switch */
+        .toggle {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            transition: var(--transition);
+        }
+
+        .toggle-slider::before {
+            content: "";
+            position: absolute;
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background: var(--text-muted);
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .toggle input:checked + .toggle-slider {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .toggle input:checked + .toggle-slider::before {
+            transform: translateX(20px);
+            background: white;
+        }
+
+        .toggle input:disabled + .toggle-slider {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Text Inputs */
+        .text-input {
+            width: 100%;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 0.625rem 0.75rem;
+            border-radius: 6px;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.85rem;
+            transition: border-color var(--transition);
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .text-input::placeholder {
+            color: var(--text-muted);
+            font-family: inherit;
+        }
+
+        /* Requirements Grid */
+        .requirements {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .requirements h3 {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.75rem;
+        }
+
+        .req-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
+
+        .req-item {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            padding: 0.375rem 0.5rem;
+            background: var(--bg-primary);
+            border-radius: 6px;
+        }
+
+        .req-icon {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6rem;
+            flex-shrink: 0;
+        }
+
+        .req-icon.pass {
+            background: var(--success);
+            color: white;
+        }
+
+        .req-icon.fail {
+            background: var(--bg-tertiary);
+            color: var(--text-muted);
+        }
+
+        /* Passphrase Section */
+        .word-count-selector {
+            display: flex;
+            gap: 0.375rem;
+            flex-wrap: wrap;
+        }
+
+        .word-count-btn {
+            padding: 0.5rem 0.875rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: var(--transition);
+        }
+
+        .word-count-btn:hover {
+            border-color: var(--accent);
+            color: var(--text-primary);
+        }
+
+        .word-count-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        .separator-options {
+            display: flex;
+            gap: 0.375rem;
+            flex-wrap: wrap;
+        }
+
+        .separator-btn {
+            padding: 0.375rem 0.625rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-family: 'SF Mono', monospace;
+            transition: var(--transition);
+            min-width: 36px;
+            text-align: center;
+        }
+
+        .separator-btn:hover {
+            border-color: var(--accent);
+        }
+
+        .separator-btn.active {
+            background: var(--accent-dim);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* History Panel */
+        .history-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem;
+            background: var(--bg-primary);
+            border-radius: var(--radius-sm);
+            margin-bottom: 0.5rem;
+            gap: 0.75rem;
+        }
+
+        .history-password {
+            font-family: 'SF Mono', monospace;
+            font-size: 0.85rem;
+            word-break: break-all;
+            flex: 1;
+        }
+
+        .history-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.25rem;
+            flex-shrink: 0;
+        }
+
+        .history-strength {
+            font-size: 0.65rem;
+            padding: 0.125rem 0.375rem;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .history-actions .icon-btn {
+            width: 28px;
+            height: 28px;
+            font-size: 0.8rem;
+        }
+
+        .history-empty {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 2rem;
+            font-size: 0.85rem;
+        }
+
+        .history-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .history-count {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .clear-btn {
+            background: transparent;
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .clear-btn:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Bulk Generator */
+        .bulk-controls {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .bulk-count {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .bulk-count label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .bulk-count input {
+            width: 60px;
+        }
+
+        .bulk-results {
+            background: var(--bg-primary);
+            border-radius: var(--radius-sm);
+            padding: 1rem;
+            max-height: 250px;
+            overflow-y: auto;
+            font-family: 'SF Mono', monospace;
+            font-size: 0.8rem;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .bulk-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .bulk-actions button {
+            flex: 1;
+            padding: 0.625rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .copy-all-btn {
+            background: var(--accent);
+            border: none;
+            color: white;
+        }
+
+        .copy-all-btn:hover {
+            background: var(--accent-hover);
+        }
+
+        /* PIN Generator */
+        .pin-display {
+            font-size: 2rem;
+            letter-spacing: 0.5rem;
+            text-align: center;
+            padding: 1.5rem;
+            background: var(--bg-primary);
+            border-radius: var(--radius);
+            margin-bottom: 1rem;
+            font-family: 'SF Mono', monospace;
+        }
+
+        .pin-length-options {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .pin-length-btn {
+            padding: 0.625rem 1.25rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .pin-length-btn:hover {
+            border-color: var(--accent);
+        }
+
+        .pin-length-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        /* Analyzer */
+        .analyzer-input {
+            width: 100%;
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .analysis-results {
+            margin-top: 1rem;
+        }
+
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .analysis-card {
+            background: var(--bg-primary);
+            padding: 0.875rem;
+            border-radius: var(--radius-sm);
+            text-align: center;
+        }
+
+        .analysis-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .analysis-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .analysis-breakdown {
+            background: var(--bg-primary);
+            padding: 1rem;
+            border-radius: var(--radius-sm);
+        }
+
+        .breakdown-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.375rem 0;
+            font-size: 0.8rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .breakdown-row:last-child {
+            border-bottom: none;
+        }
+
+        .breakdown-label {
+            color: var(--text-secondary);
+        }
+
+        .breakdown-value {
+            font-weight: 500;
+        }
+
+        .warnings-list {
+            margin-top: 1rem;
+        }
+
+        .warning-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            padding: 0.625rem;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: var(--radius-sm);
+            margin-bottom: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--danger);
+        }
+
+        .warning-item.info {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.3);
+            color: var(--info);
+        }
+
+        .warning-item.success {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: rgba(34, 197, 94, 0.3);
+            color: var(--success);
+        }
+
+        /* Security Info */
+        .security-info {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem;
+        }
+
+        .security-info h3 {
+            font-size: 0.85rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .security-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+        }
+
+        .security-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .security-item::before {
+            content: "✓";
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            font-size: 0.85rem;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            border-color: var(--success);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+            padding: 1rem;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            transform: scale(0.95);
+            transition: transform var(--transition);
+        }
+
+        .modal-overlay.show .modal {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .modal-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: 0.25rem;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            color: var(--text-primary);
+        }
+
+        /* Keyboard Shortcuts */
+        .shortcuts-grid {
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .shortcut-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .shortcut-item:last-child {
+            border-bottom: none;
+        }
+
+        .shortcut-keys {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .key {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-family: 'SF Mono', monospace;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .req-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .analysis-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .security-list {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+
+            .tab {
+                flex: 1 1 45%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔐 Password Generator Pro</h1>
+            <div class="security-badges">
+                <span class="badge">🔒 Air-Gapped</span>
+                <span class="badge">💾 Zero Storage</span>
+                <span class="badge">🌐 Offline Ready</span>
+                <span class="badge">🔑 Crypto API</span>
+            </div>
+        </header>
+
+        <!-- Main Tabs -->
+        <div class="tabs">
+            <button class="tab active" data-tab="password">Password</button>
+            <button class="tab" data-tab="passphrase">Passphrase</button>
+            <button class="tab" data-tab="pin">PIN</button>
+            <button class="tab" data-tab="analyze">Analyze</button>
+        </div>
+
+        <!-- Password Generator Tab -->
+        <div id="password-tab" class="tab-content active">
+            <div class="card">
+                <div class="password-display">
+                    <div class="password-text" id="password">Click generate to create a password</div>
+                    <div class="password-actions">
+                        <button class="icon-btn" id="toggleMask" title="Toggle visibility (V)">👁️</button>
+                        <button class="icon-btn" id="copyBtn" title="Copy (Ctrl+C)">📋</button>
+                        <button class="icon-btn" id="refreshBtn" title="Regenerate (R)">🔄</button>
+                    </div>
+                </div>
+
+                <div class="strength-section">
+                    <div class="strength-bar-container" id="strengthBar">
+                        <div class="strength-segment"></div>
+                        <div class="strength-segment"></div>
+                        <div class="strength-segment"></div>
+                        <div class="strength-segment"></div>
+                        <div class="strength-segment"></div>
+                    </div>
+                    <div class="strength-info">
+                        <div class="strength-label">
+                            <span class="strength-text" id="strengthText">--</span>
+                            <span class="entropy-badge" id="entropyBadge">0 bits</span>
+                        </div>
+                        <span class="crack-time" id="crackTime">--</span>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="generate-btn" id="generateBtn">
+                        <span>⚡</span> Generate Password
+                    </button>
+                    <button class="bulk-btn" id="openBulkBtn" title="Generate multiple">📑</button>
+                </div>
+
+                <div class="requirements" id="requirements">
+                    <h3>Security Checklist</h3>
+                    <div class="req-grid" id="reqList"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">⚙️ Options</span>
+                    <button class="icon-btn" id="helpBtn" title="Keyboard shortcuts">❓</button>
+                </div>
+                
+                <div class="options-grid">
+                    <div class="option-row">
+                        <div class="option-label">
+                            <span class="option-title">Length</span>
+                            <span class="option-desc">8-128 characters</span>
+                        </div>
+                        <div class="length-control">
+                            <input type="range" id="lengthRange" min="8" max="128" value="20">
+                            <input type="number" id="lengthInput" min="8" max="128" value="20" class="length-input">
+                        </div>
+                    </div>
+
+                    <div class="option-row">
+                        <div class="option-label">
+                            <span class="option-title">Uppercase</span>
+                            <span class="option-desc">A-Z</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="uppercase" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="option-row">
+                        <div class="option-label">
+                            <span class="option-title">Lowercase</span>
+                            <span class="option-desc">a-z</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="lowercase" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="option-row">
+                        <div class="option-label">
+                            <span class="option-title">Numbers</span>
+                            <span class="option-desc">0-9</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="numbers" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="option-row">
+                        <div class="option-label">
+                            <span class="option-title">Symbols</span>
+                            <span class="option-desc">!@#$%^&*()_+-=[]{}|;:,.<>?</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="symbols" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="option-row">
+                        <div class="option-label">
+                            <span class="option-title">Avoid Ambiguous</span>
+                            <span class="option-desc">Excludes 0OlI1|</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="avoidAmbiguous">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="option-row">
+                        <div class="option-label">
+                            <span class="option-title">Begin with Letter</span>
+                            <span class="option-desc">First character is a-z or A-Z</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="beginLetter">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="option-row">
+                        <div class="option-label">
+                            <span class="option-title">No Consecutive</span>
+                            <span class="option-desc">Prevents aaa, 111, etc.</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="noConsecutive">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div style="margin-top: 0.5rem;">
+                        <div class="option-label" style="margin-bottom: 0.5rem;">
+                            <span class="option-title">Exclude Characters</span>
+                            <span class="option-desc">Characters to omit from password</span>
+                        </div>
+                        <input type="text" id="excludeChars" class="text-input" placeholder="e.g., {}[]<>\/&quot;">
+                    </div>
+
+                    <div style="margin-top: 0.5rem;">
+                        <div class="option-label" style="margin-bottom: 0.5rem;">
+                            <span class="option-title">Include Characters</span>
+                            <span class="option-desc">Custom characters to include</span>
+                        </div>
+                        <input type="text" id="includeChars" class="text-input" placeholder="e.g., éñü特殊">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Session History (in-memory only) -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">📜 Session History</span>
+                </div>
+                <div class="history-controls">
+                    <span class="history-count" id="historyCount">0 passwords this session</span>
+                    <button class="clear-btn" id="clearHistory">Clear All</button>
+                </div>
+                <div class="history-list" id="historyList">
+                    <div class="history-empty">Generated passwords appear here (memory only, cleared on refresh)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Passphrase Tab -->
+        <div id="passphrase-tab" class="tab-content">
+            <div class="card">
+                <div class="password-display">
+                    <div class="password-text" id="passphrase">Click generate to create a passphrase</div>
+                    <div class="password-actions">
+                        <button class="icon-btn passphrase-copy" title="Copy">📋</button>
+                        <button class="icon-btn passphrase-refresh" title="Regenerate">🔄</button>
+                    </div>
+                </div>
+
+                <div class="strength-section">
+                    <div class="strength-bar-container" id="passphraseStrengthBar">
+                        <div class="strength-segment"></div>
+                        <div class="strength-segment"></div>
+                        <div class="strength-segment"></div>
+                        <div class="strength-segment"></div>
+                        <div class="strength-segment"></div>
+                    </div>
+                    <div class="strength-info">
+                        <div class="strength-label">
+                            <span class="strength-text" id="passphraseStrengthText">--</span>
+                            <span class="entropy-badge" id="passphraseEntropyBadge">0 bits</span>
+                        </div>
+                        <span class="crack-time" id="passphraseCrackTime">--</span>
+                    </div>
+                </div>
+
+                <button class="generate-btn" id="generatePassphraseBtn" style="width: 100%;">
+                    <span>⚡</span> Generate Passphrase
+                </button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">⚙️ Passphrase Options</span>
+                </div>
+                
+                <div class="options-grid">
+                    <div class="option-row">
+                        <div class="option-label">
+                            <span class="option-title">Word Count</span>
+                        </div>
+                        <div class="word-count-selector" id="wordCountSelector">
+                            <button class="word-count-btn" data-count="3">3</button>
+                            <button class="word-count-btn" data-count="4">4</button>
+                            <button class="word-count-btn active" data-count="5">5</button>
+                            <button class="word-count-btn" data-count="6">6</button>
+                            <button class="word-count-btn" data-count="7">7</button>
+                            <button class="word-count-btn" data-count="8">8</button>
+                        </div>
+                    </div>
+
+                    <div class="option-row">
+                        <div class="option-label">
+                            <span class="option-title">Separator</span>
+                        </div>
+                        <div class="separator-options" id="separatorSelector">
+                            <button class="separator-btn active" data-sep="-">-</button>
+                            <button class="separator-btn" data-sep="_">_</button>
+                            <button class="separator-btn" data-sep=".">.</button>
+                            <button class="separator-btn" data-sep=" ">␣</button>
+                            <button class="separator-btn" data-sep="">∅</button>
+                        </div>
+                    </div>
+
+                    <div class="option-row">
+                        <div class="option-label">
+                            <span class="option-title">Capitalize Words</span>
+                            <span class="option-desc">First letter uppercase</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="capitalizeWords" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="option-row">
+                        <div class="option-label">
+                            <span class="option-title">Add Number</span>
+                            <span class="option-desc">Append random digit</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="addNumber" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="option-row">
+                        <div class="option-label">
+                            <span class="option-title">Add Symbol</span>
+                            <span class="option-desc">Append random symbol</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="addSymbol">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PIN Tab -->
+        <div id="pin-tab" class="tab-content">
+            <div class="card">
+                <div class="pin-display" id="pinDisplay">----</div>
+                
+                <div class="pin-length-options" id="pinLengthSelector">
+                    <button class="pin-length-btn" data-length="4">4 digits</button>
+                    <button class="pin-length-btn active" data-length="6">6 digits</button>
+                    <button class="pin-length-btn" data-length="8">8 digits</button>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="generate-btn" id="generatePinBtn" style="flex: 1;">
+                        <span>⚡</span> Generate PIN
+                    </button>
+                    <button class="icon-btn" id="copyPinBtn" title="Copy PIN" style="width: 50px; height: auto;">📋</button>
+                </div>
+
+                <div class="options-grid" style="margin-top: 1rem;">
+                    <div class="option-row">
+                        <div class="option-label">
+                            <span class="option-title">Avoid Patterns</span>
+                            <span class="option-desc">No sequences like 1234, 1111</span>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="avoidPinPatterns" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analyze Tab -->
+        <div id="analyze-tab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">🔍 Password Analyzer</span>
+                </div>
+                
+                <textarea id="analyzeInput" class="text-input analyzer-input" placeholder="Enter a password to analyze..."></textarea>
+                
+                <div class="analysis-results" id="analysisResults" style="display: none;">
+                    <div class="analysis-grid">
+                        <div class="analysis-card">
+                            <div class="analysis-value" id="analysisEntropy">0</div>
+                            <div class="analysis-label">Entropy (bits)</div>
+                        </div>
+                        <div class="analysis-card">
+                            <div class="analysis-value" id="analysisStrength">--</div>
+                            <div class="analysis-label">Strength</div>
+                        </div>
+                        <div class="analysis-card">
+                            <div class="analysis-value" id="analysisLength">0</div>
+                            <div class="analysis-label">Length</div>
+                        </div>
+                        <div class="analysis-card">
+                            <div class="analysis-value" id="analysisCrackTime">--</div>
+                            <div class="analysis-label">Crack Time</div>
+                        </div>
+                    </div>
+
+                    <div class="analysis-breakdown">
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Uppercase Letters</span>
+                            <span class="breakdown-value" id="breakdownUpper">0</span>
+                        </div>
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Lowercase Letters</span>
+                            <span class="breakdown-value" id="breakdownLower">0</span>
+                        </div>
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Numbers</span>
+                            <span class="breakdown-value" id="breakdownNumbers">0</span>
+                        </div>
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Symbols</span>
+                            <span class="breakdown-value" id="breakdownSymbols">0</span>
+                        </div>
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Unique Characters</span>
+                            <span class="breakdown-value" id="breakdownUnique">0</span>
+                        </div>
+                    </div>
+
+                    <div class="warnings-list" id="warningsList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Info -->
+        <div class="security-info">
+            <h3>🛡️ Security Guarantees</h3>
+            <div class="security-list">
+                <span class="security-item">Web Crypto API (CSPRNG)</span>
+                <span class="security-item">No network requests</span>
+                <span class="security-item">No cookies or storage</span>
+                <span class="security-item">CSP blocks externals</span>
+                <span class="security-item">Memory cleared on close</span>
+                <span class="security-item">Works fully offline</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Bulk Generator Modal -->
+    <div class="modal-overlay" id="bulkModal">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title">📑 Bulk Password Generator</span>
+                <button class="modal-close" id="closeBulkModal">&times;</button>
+            </div>
+            
+            <div class="bulk-controls">
+                <div class="bulk-count">
+                    <label>Count:</label>
+                    <input type="number" id="bulkCount" class="length-input" value="10" min="1" max="100">
+                </div>
+                <button class="generate-btn" id="generateBulkBtn" style="flex: 1;">Generate</button>
+            </div>
+            
+            <div class="bulk-results" id="bulkResults">Passwords will appear here...</div>
+            
+            <div class="bulk-actions">
+                <button class="copy-all-btn" id="copyAllBtn">📋 Copy All</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div class="modal-overlay" id="helpModal">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title">⌨️ Keyboard Shortcuts</span>
+                <button class="modal-close" id="closeHelpModal">&times;</button>
+            </div>
+            
+            <div class="shortcuts-grid">
+                <div class="shortcut-item">
+                    <span>Generate new password</span>
+                    <div class="shortcut-keys"><span class="key">G</span> or <span class="key">Enter</span></div>
+                </div>
+                <div class="shortcut-item">
+                    <span>Copy to clipboard</span>
+                    <div class="shortcut-keys"><span class="key">Ctrl</span><span class="key">C</span></div>
+                </div>
+                <div class="shortcut-item">
+                    <span>Regenerate</span>
+                    <div class="shortcut-keys"><span class="key">R</span></div>
+                </div>
+                <div class="shortcut-item">
+                    <span>Toggle visibility</span>
+                    <div class="shortcut-keys"><span class="key">V</span></div>
+                </div>
+                <div class="shortcut-item">
+                    <span>Increase length</span>
+                    <div class="shortcut-keys"><span class="key">↑</span></div>
+                </div>
+                <div class="shortcut-item">
+                    <span>Decrease length</span>
+                    <div class="shortcut-keys"><span class="key">↓</span></div>
+                </div>
+                <div class="shortcut-item">
+                    <span>Show this help</span>
+                    <div class="shortcut-keys"><span class="key">?</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // ==================== CRYPTO VERIFICATION ====================
+            if (!window.crypto || !window.crypto.getRandomValues) {
+                document.body.innerHTML = '<div style="padding: 2rem; text-align: center; color: #ef4444;">Error: Secure random generation not available in this browser. Please use a modern browser.</div>';
+                return;
+            }
+
+            // ==================== CONSTANTS ====================
+            const CHAR_SETS = {
+                uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+                lowercase: 'abcdefghijklmnopqrstuvwxyz',
+                numbers: '0123456789',
+                symbols: '!@#$%^&*()_+-=[]{}|;:,.<>?'
+            };
+
+            const AMBIGUOUS_CHARS = '0OlI1|';
+
+            // EFF Large Wordlist (truncated for size - full list has 7776 words)
+            // Using a representative sample of common, memorable words
+            const WORDLIST = [
+                'abandon', 'ability', 'able', 'about', 'above', 'absent', 'absorb', 'abstract', 'absurd', 'abuse',
+                'access', 'accident', 'account', 'accuse', 'achieve', 'acid', 'acoustic', 'acquire', 'across', 'act',
+                'action', 'actor', 'actress', 'actual', 'adapt', 'add', 'addict', 'address', 'adjust', 'admit',
+                'adult', 'advance', 'advice', 'aerobic', 'affair', 'afford', 'afraid', 'again', 'age', 'agent',
+                'agree', 'ahead', 'aim', 'air', 'airport', 'aisle', 'alarm', 'album', 'alcohol', 'alert',
+                'alien', 'all', 'alley', 'allow', 'almost', 'alone', 'alpha', 'already', 'also', 'alter',
+                'always', 'amateur', 'amazing', 'among', 'amount', 'amused', 'analyst', 'anchor', 'ancient', 'anger',
+                'angle', 'angry', 'animal', 'ankle', 'announce', 'annual', 'another', 'answer', 'antenna', 'antique',
+                'anxiety', 'any', 'apart', 'apology', 'appear', 'apple', 'approve', 'april', 'arch', 'arctic',
+                'area', 'arena', 'argue', 'arm', 'armed', 'armor', 'army', 'around', 'arrange', 'arrest',
+                'bacon', 'badge', 'bag', 'balance', 'balcony', 'ball', 'bamboo', 'banana', 'banner', 'bar',
+                'barely', 'bargain', 'barrel', 'base', 'basic', 'basket', 'battle', 'beach', 'bean', 'beauty',
+                'because', 'become', 'beef', 'before', 'begin', 'behave', 'behind', 'believe', 'below', 'belt',
+                'bench', 'benefit', 'best', 'betray', 'better', 'between', 'beyond', 'bicycle', 'bid', 'bike',
+                'bind', 'biology', 'bird', 'birth', 'bitter', 'black', 'blade', 'blame', 'blanket', 'blast',
+                'cabin', 'cable', 'cactus', 'cage', 'cake', 'call', 'calm', 'camera', 'camp', 'can',
+                'canal', 'cancel', 'candy', 'cannon', 'canoe', 'canvas', 'canyon', 'capable', 'capital', 'captain',
+                'car', 'carbon', 'card', 'cargo', 'carpet', 'carry', 'cart', 'case', 'cash', 'casino',
+                'castle', 'casual', 'cat', 'catalog', 'catch', 'category', 'cattle', 'caught', 'cause', 'caution',
+                'cave', 'ceiling', 'celery', 'cement', 'census', 'century', 'cereal', 'certain', 'chair', 'chalk',
+                'daddy', 'damage', 'damp', 'dance', 'danger', 'daring', 'dash', 'daughter', 'dawn', 'day',
+                'deal', 'debate', 'debris', 'decade', 'december', 'decide', 'decline', 'decorate', 'decrease', 'deer',
+                'defense', 'define', 'defy', 'degree', 'delay', 'deliver', 'demand', 'demise', 'denial', 'dentist',
+                'eagle', 'early', 'earn', 'earth', 'easily', 'east', 'easy', 'echo', 'ecology', 'economy',
+                'edge', 'edit', 'educate', 'effort', 'egg', 'eight', 'either', 'elbow', 'elder', 'electric',
+                'elegant', 'element', 'elephant', 'elevator', 'elite', 'else', 'embark', 'embody', 'embrace', 'emerge',
+                'fabric', 'face', 'faculty', 'fade', 'faint', 'faith', 'fall', 'false', 'fame', 'family',
+                'famous', 'fan', 'fancy', 'fantasy', 'farm', 'fashion', 'fat', 'fatal', 'father', 'fatigue',
+                'fault', 'favorite', 'feature', 'february', 'federal', 'fee', 'feed', 'feel', 'female', 'fence',
+                'galaxy', 'gallery', 'game', 'gap', 'garage', 'garbage', 'garden', 'garlic', 'garment', 'gas',
+                'gasp', 'gate', 'gather', 'gauge', 'gaze', 'general', 'genius', 'genre', 'gentle', 'genuine',
+                'habit', 'hair', 'half', 'hammer', 'hamster', 'hand', 'happy', 'harbor', 'hard', 'harsh',
+                'harvest', 'hat', 'have', 'hawk', 'hazard', 'head', 'health', 'heart', 'heavy', 'hedgehog',
+                'ice', 'icon', 'idea', 'identify', 'idle', 'ignore', 'ill', 'illegal', 'illness', 'image',
+                'imitate', 'immense', 'immune', 'impact', 'impose', 'improve', 'impulse', 'inch', 'include', 'income',
+                'jacket', 'jaguar', 'jar', 'jazz', 'jealous', 'jeans', 'jelly', 'jewel', 'job', 'join',
+                'joke', 'journey', 'joy', 'judge', 'juice', 'jump', 'jungle', 'junior', 'junk', 'just',
+                'kangaroo', 'keen', 'keep', 'ketchup', 'key', 'kick', 'kid', 'kidney', 'kind', 'kingdom',
+                'kiss', 'kit', 'kitchen', 'kite', 'kitten', 'kiwi', 'knee', 'knife', 'knock', 'know',
+                'label', 'labor', 'ladder', 'lady', 'lake', 'lamp', 'language', 'laptop', 'large', 'later',
+                'latin', 'laugh', 'laundry', 'lava', 'law', 'lawn', 'lawsuit', 'layer', 'lazy', 'leader',
+                'machine', 'mad', 'magic', 'magnet', 'maid', 'mail', 'main', 'major', 'make', 'mammal',
+                'man', 'manage', 'mandate', 'mango', 'mansion', 'manual', 'maple', 'marble', 'march', 'margin',
+                'naive', 'name', 'napkin', 'narrow', 'nasty', 'nation', 'nature', 'near', 'neck', 'need',
+                'negative', 'neglect', 'neither', 'nephew', 'nerve', 'nest', 'net', 'network', 'neutral', 'never',
+                'oak', 'obey', 'object', 'oblige', 'obscure', 'observe', 'obtain', 'obvious', 'occur', 'ocean',
+                'october', 'odor', 'off', 'offer', 'office', 'often', 'oil', 'okay', 'old', 'olive',
+                'olympic', 'omit', 'once', 'one', 'onion', 'online', 'only', 'open', 'opera', 'opinion',
+                'pact', 'paddle', 'page', 'pair', 'palace', 'palm', 'panda', 'panel', 'panic', 'panther',
+                'paper', 'parade', 'parent', 'park', 'parrot', 'party', 'pass', 'patch', 'path', 'patient',
+                'quality', 'quantum', 'quarter', 'question', 'quick', 'quit', 'quiz', 'quote',
+                'rabbit', 'raccoon', 'race', 'rack', 'radar', 'radio', 'rail', 'rain', 'raise', 'rally',
+                'ramp', 'ranch', 'random', 'range', 'rapid', 'rare', 'rate', 'rather', 'raven', 'raw',
+                'saddle', 'sadness', 'safe', 'sail', 'salad', 'salmon', 'salon', 'salt', 'salute', 'same',
+                'sample', 'sand', 'satisfy', 'satoshi', 'sauce', 'sausage', 'save', 'say', 'scale', 'scan',
+                'table', 'tackle', 'tag', 'tail', 'talent', 'talk', 'tank', 'tape', 'target', 'task',
+                'taste', 'tattoo', 'taxi', 'teach', 'team', 'tell', 'ten', 'tenant', 'tennis', 'tent',
+                'ugly', 'umbrella', 'unable', 'unaware', 'uncle', 'uncover', 'under', 'undo', 'unfair', 'unfold',
+                'unhappy', 'uniform', 'unique', 'unit', 'universe', 'unknown', 'unlock', 'until', 'unusual', 'unveil',
+                'vacant', 'vacuum', 'vague', 'valid', 'valley', 'valve', 'van', 'vanish', 'vapor', 'various',
+                'vast', 'vault', 'vehicle', 'velvet', 'vendor', 'venture', 'venue', 'verb', 'verify', 'version',
+                'wasp', 'waste', 'water', 'wave', 'way', 'wealth', 'weapon', 'wear', 'weasel', 'weather',
+                'web', 'wedding', 'weekend', 'weird', 'welcome', 'west', 'wet', 'whale', 'what', 'wheat',
+                'xray',
+                'yard', 'year', 'yellow', 'you', 'young', 'youth',
+                'zebra', 'zero', 'zone', 'zoo',
+                'apple', 'arrow', 'atlas', 'atom', 'badge', 'baker', 'beard', 'beast', 'bench', 'blade',
+                'blaze', 'blend', 'blink', 'bliss', 'block', 'bloom', 'board', 'boost', 'booth', 'bound',
+                'brain', 'brand', 'brass', 'brave', 'bread', 'break', 'breed', 'brick', 'bride', 'brief',
+                'broom', 'brush', 'buddy', 'build', 'bunch', 'burst', 'buyer', 'camel', 'candy', 'chain',
+                'chair', 'champ', 'chaos', 'charm', 'chase', 'cheap', 'check', 'chess', 'chest', 'chief',
+                'child', 'chill', 'china', 'chirp', 'choke', 'chord', 'chunk', 'civic', 'civil', 'claim',
+                'clamp', 'clash', 'clasp', 'class', 'clean', 'clear', 'clerk', 'click', 'cliff', 'climb',
+                'cling', 'clock', 'clone', 'close', 'cloth', 'cloud', 'clown', 'coach', 'coast', 'coral',
+                'count', 'couch', 'cover', 'crack', 'craft', 'crane', 'crash', 'crawl', 'crazy', 'cream',
+                'delta', 'demon', 'denim', 'depth', 'derby', 'diary', 'digit', 'disco', 'diver', 'dizzy',
+                'dodge', 'donor', 'donut', 'doubt', 'dough', 'draft', 'drain', 'drake', 'drama', 'dream',
+                'dress', 'drift', 'drill', 'drink', 'drive', 'drone', 'drown', 'drunk', 'dryer', 'dwarf',
+                'ember', 'empty', 'enemy', 'enjoy', 'enter', 'entry', 'equal', 'equip', 'erase', 'error',
+                'essay', 'event', 'every', 'exact', 'exile', 'exist', 'extra', 'fable', 'fairy', 'faith',
+                'flame', 'flash', 'flask', 'flesh', 'flick', 'float', 'flock', 'flood', 'floor', 'flour',
+                'fluid', 'flush', 'flute', 'focus', 'foggy', 'folly', 'force', 'forge', 'forgo', 'forte',
+                'forum', 'found', 'fowl', 'frame', 'frank', 'fraud', 'freak', 'fresh', 'fried', 'front',
+                'frost', 'fruit', 'fuels', 'funny', 'ghost', 'giant', 'giddy', 'gifts', 'given', 'glass',
+                'gleam', 'glide', 'globe', 'gloom', 'glory', 'gloss', 'glove', 'grace', 'grade', 'grain',
+                'grand', 'grant', 'grape', 'grasp', 'grass', 'grave', 'great', 'greed', 'green', 'greet',
+                'grief', 'grill', 'grind', 'groan', 'groom', 'gross', 'group', 'grove', 'growl', 'grown',
+                'grunt', 'guard', 'guess', 'guest', 'guide', 'guild', 'guilt', 'guise', 'hello', 'hence',
+                'herbs', 'hinge', 'hippo', 'hobby', 'hoist', 'honey', 'honor', 'horse', 'hotel', 'hound',
+                'house', 'hover', 'human', 'humid', 'humor', 'hurry', 'ideal', 'idiot', 'index', 'inner',
+                'input', 'intro', 'irony', 'issue', 'ivory', 'jelly', 'jewel', 'joint', 'jolly', 'joker',
+                'judge', 'juice', 'jumbo', 'jumpy', 'karma', 'kayak', 'kebab', 'kitty', 'label', 'labor',
+                'laser', 'latch', 'later', 'laugh', 'layer', 'learn', 'lease', 'least', 'leave', 'ledge',
+                'legal', 'lemon', 'level', 'lever', 'light', 'limit', 'linen', 'liner', 'links', 'lions',
+                'lipid', 'liver', 'llama', 'lobby', 'local', 'lodge', 'logic', 'login', 'looks', 'loops',
+                'lorry', 'loser', 'lotus', 'loved', 'lover', 'lower', 'loyal', 'lunar', 'lunch', 'lyric',
+                'macro', 'mafia', 'manga', 'manor', 'maple', 'march', 'marry', 'marsh', 'match', 'mayor',
+                'melon', 'mercy', 'merge', 'merit', 'merry', 'metal', 'meter', 'micro', 'midst', 'might',
+                'minus', 'mirth', 'model', 'modem', 'moist', 'money', 'month', 'moral', 'motor', 'motto',
+                'mount', 'mouse', 'mouth', 'movie', 'muddy', 'mural', 'music', 'naive', 'nerve', 'never',
+                'night', 'ninja', 'ninth', 'noble', 'noise', 'nomad', 'north', 'notch', 'noted', 'novel',
+                'nurse', 'occur', 'offer', 'often', 'olive', 'orbit', 'order', 'organ', 'other', 'ought',
+                'outer', 'outgo', 'oxide', 'ozone', 'panda', 'panel', 'panic', 'paper', 'party', 'pasta',
+                'patch', 'pause', 'peace', 'peach', 'pearl', 'pedal', 'penny', 'perch', 'peril', 'petty',
+                'phase', 'phone', 'photo', 'piano', 'piece', 'pilot', 'pinch', 'pitch', 'pizza', 'place',
+                'plain', 'plane', 'plant', 'plate', 'plaza', 'plead', 'pluck', 'plumb', 'plump', 'plunge',
+                'plush', 'poach', 'point', 'polar', 'ponds', 'porch', 'poser', 'posse', 'pound', 'power',
+                'press', 'price', 'pride', 'prime', 'print', 'prism', 'prize', 'probe', 'proof', 'prose',
+                'proud', 'prove', 'proxy', 'prune', 'pulse', 'pupil', 'puppy', 'purge', 'queen', 'quest',
+                'quick', 'quiet', 'quilt', 'quirk', 'quota', 'quote', 'radar', 'radio', 'rally', 'ranch',
+                'range', 'rapid', 'ratio', 'reach', 'react', 'realm', 'rebel', 'refer', 'reign', 'relax',
+                'remit', 'renal', 'renew', 'repay', 'reply', 'rerun', 'reset', 'resin', 'retro', 'rhino',
+                'rider', 'ridge', 'rifle', 'right', 'rigid', 'rigor', 'rinse', 'ripen', 'risen', 'risky',
+                'rival', 'river', 'roast', 'robot', 'rocky', 'rogue', 'roman', 'roost', 'roots', 'roses',
+                'rouge', 'rough', 'round', 'route', 'rover', 'royal', 'rugby', 'ruins', 'ruler', 'rumor',
+                'rural', 'rusty', 'sadly', 'saint', 'salad', 'salon', 'sandy', 'satin', 'sauce', 'sauna',
+                'savor', 'scale', 'scald', 'scalp', 'scant', 'scare', 'scarf', 'scene', 'scent', 'scope',
+                'score', 'scout', 'scrap', 'seize', 'serve', 'seven', 'shade', 'shake', 'shame', 'shape',
+                'share', 'shark', 'sharp', 'sheep', 'sheer', 'sheet', 'shelf', 'shell', 'shift', 'shine',
+                'shirt', 'shock', 'shore', 'short', 'shout', 'shove', 'shown', 'shrub', 'sight', 'sigma',
+                'silky', 'silly', 'since', 'siren', 'sixty', 'skill', 'skull', 'slate', 'slave', 'sleep',
+                'slice', 'slide', 'slime', 'slope', 'sloth', 'slugs', 'slush', 'small', 'smart', 'smash',
+                'smell', 'smile', 'smith', 'smoke', 'snack', 'snake', 'snare', 'sneak', 'sniff', 'snort',
+                'solar', 'solid', 'solve', 'sonic', 'sorry', 'sound', 'south', 'space', 'spare', 'spark',
+                'spawn', 'speak', 'speed', 'spell', 'spend', 'spice', 'spicy', 'spine', 'spite', 'split',
+                'spoke', 'spoon', 'sport', 'spray', 'squad', 'stack', 'staff', 'stage', 'stain', 'stake',
+                'stamp', 'stand', 'start', 'state', 'stave', 'stays', 'steak', 'steam', 'steel', 'steep',
+                'steer', 'stems', 'steps', 'stern', 'stick', 'stiff', 'still', 'sting', 'stink', 'stock',
+                'stomp', 'stone', 'stool', 'store', 'stork', 'storm', 'story', 'stout', 'stove', 'strap',
+                'straw', 'stray', 'strip', 'stuck', 'study', 'stuff', 'stump', 'stung', 'stunk', 'style',
+                'sugar', 'suite', 'sunny', 'super', 'surge', 'sushi', 'swamp', 'swarm', 'swear', 'sweat',
+                'sweep', 'sweet', 'swept', 'swift', 'swing', 'sword', 'sworn', 'swung', 'syrup', 'taboo',
+                'tacit', 'taffy', 'taint', 'taken', 'talks', 'tally', 'tango', 'tangy', 'tapes', 'tardy',
+                'tasty', 'taxes', 'teach', 'tears', 'teddy', 'teeth', 'tempo', 'tense', 'tenth', 'tepid',
+                'terms', 'tests', 'thank', 'theft', 'theme', 'thick', 'thief', 'thigh', 'thing', 'think',
+                'third', 'thorn', 'those', 'three', 'threw', 'throw', 'thumb', 'tiger', 'tight', 'timer',
+                'times', 'tipsy', 'tired', 'titan', 'title', 'toast', 'today', 'token', 'tonic', 'tooth',
+                'topic', 'torch', 'total', 'touch', 'tough', 'tours', 'towel', 'tower', 'towns', 'toxic',
+                'trace', 'track', 'trade', 'trail', 'train', 'trait', 'tramp', 'trash', 'trawl', 'tread',
+                'treat', 'trend', 'trial', 'tribe', 'trick', 'tried', 'troop', 'trout', 'truce', 'truck',
+                'truly', 'trump', 'trunk', 'trust', 'truth', 'tulip', 'tumor', 'tuned', 'turbo', 'tutor',
+                'tweak', 'tweed', 'twice', 'twins', 'twist', 'tying', 'udder', 'ultra', 'uncut', 'under',
+                'unfit', 'union', 'unite', 'unity', 'upper', 'upset', 'urban', 'urged', 'usage', 'using',
+                'usual', 'utter', 'vague', 'valid', 'valor', 'value', 'valve', 'vapor', 'vault', 'vegan',
+                'venue', 'verge', 'verse', 'video', 'vigor', 'villa', 'vinyl', 'viola', 'viper', 'viral',
+                'virus', 'visit', 'visor', 'vista', 'vital', 'vivid', 'vocal', 'vodka', 'vogue', 'voice',
+                'voila', 'vomit', 'voter', 'vouch', 'vowel', 'wacky', 'wager', 'wages', 'wagon', 'waist',
+                'waltz', 'wanna', 'warmly', 'warns', 'waste', 'watch', 'waver', 'waves', 'waxed', 'weary',
+                'weave', 'wedge', 'weeds', 'weeks', 'weigh', 'weird', 'wells', 'welsh', 'whack', 'whale',
+                'wharf', 'wheat', 'wheel', 'whelp', 'where', 'which', 'while', 'whine', 'whisk', 'white',
+                'whole', 'whoop', 'whose', 'widen', 'wider', 'widow', 'width', 'wield', 'willy', 'wimpy',
+                'windy', 'wired', 'wiser', 'witch', 'witty', 'woken', 'woman', 'women', 'woody', 'woozy',
+                'words', 'wordy', 'world', 'worms', 'worry', 'worse', 'worst', 'worth', 'would', 'wound',
+                'woven', 'wrack', 'wrath', 'wreak', 'wreck', 'wrest', 'wring', 'wrist', 'write', 'wrong',
+                'wrote', 'wrung', 'yacht', 'yearn', 'yeast', 'yield', 'young', 'yours', 'youth', 'zebra',
+                'zesty', 'zippy', 'zonal', 'zones'
+            ];
+
+            // Common weak passwords / patterns to check
+            const COMMON_PASSWORDS = new Set([
+                'password', '123456', '12345678', 'qwerty', 'abc123', 'monkey', 'master', 'dragon',
+                'letmein', 'login', 'welcome', 'ninja', 'passw0rd', 'hello', 'shadow', 'sunshine',
+                'princess', 'admin', 'administrator', 'root', 'toor', 'pass', 'test', 'guest',
+                '123456789', '1234567890', 'password1', 'password123', 'iloveyou', 'trustno1'
+            ]);
+
+            // ==================== STATE ====================
+            let state = {
+                currentPassword: '',
+                masked: false,
+                history: [],
+                wordCount: 5,
+                separator: '-',
+                pinLength: 6
+            };
+
+            // ==================== UTILITIES ====================
+            function secureRandom(max) {
+                const array = new Uint32Array(1);
+                const maxValid = Math.floor(0xFFFFFFFF / max) * max;
+                let value;
+                do {
+                    crypto.getRandomValues(array);
+                    value = array[0];
+                } while (value >= maxValid);
+                return value % max;
+            }
+
+            function secureShuffle(array) {
+                const arr = [...array];
+                for (let i = arr.length - 1; i > 0; i--) {
+                    const j = secureRandom(i + 1);
+                    [arr[i], arr[j]] = [arr[j], arr[i]];
+                }
+                return arr;
+            }
+
+            function $(id) {
+                return document.getElementById(id);
+            }
+
+            function $$(selector) {
+                return document.querySelectorAll(selector);
+            }
+
+            function showToast(message, type = '') {
+                const toast = $('toast');
+                toast.textContent = message;
+                toast.className = 'toast show' + (type ? ' ' + type : '');
+                setTimeout(() => toast.classList.remove('show'), 2500);
+            }
+
+            // ==================== PASSWORD GENERATION ====================
+            function getPasswordOptions() {
+                return {
+                    length: parseInt($('lengthInput').value) || 20,
+                    uppercase: $('uppercase').checked,
+                    lowercase: $('lowercase').checked,
+                    numbers: $('numbers').checked,
+                    symbols: $('symbols').checked,
+                    avoidAmbiguous: $('avoidAmbiguous').checked,
+                    beginLetter: $('beginLetter').checked,
+                    noConsecutive: $('noConsecutive').checked,
+                    excludeChars: $('excludeChars').value,
+                    includeChars: $('includeChars').value
+                };
+            }
+
+            function buildCharPool(options) {
+                let pool = '';
+                if (options.uppercase) pool += CHAR_SETS.uppercase;
+                if (options.lowercase) pool += CHAR_SETS.lowercase;
+                if (options.numbers) pool += CHAR_SETS.numbers;
+                if (options.symbols) pool += CHAR_SETS.symbols;
+                if (options.includeChars) pool += options.includeChars;
+
+                if (options.avoidAmbiguous) {
+                    pool = pool.split('').filter(c => !AMBIGUOUS_CHARS.includes(c)).join('');
+                }
+
+                if (options.excludeChars) {
+                    const excluded = new Set(options.excludeChars.split(''));
+                    pool = pool.split('').filter(c => !excluded.has(c)).join('');
+                }
+
+                // Remove duplicates
+                pool = [...new Set(pool.split(''))].join('');
+                return pool;
+            }
+
+            function generatePassword() {
+                const options = getPasswordOptions();
+                const pool = buildCharPool(options);
+
+                if (pool.length === 0) {
+                    $('password').textContent = 'Select at least one character type';
+                    updateStrengthDisplay('', 0, 'password');
+                    return '';
+                }
+
+                if (options.length < 8) {
+                    $('password').textContent = 'Minimum length is 8 characters';
+                    return '';
+                }
+
+                // Build required characters
+                const required = [];
+                const letterPool = (options.uppercase ? CHAR_SETS.uppercase : '') + 
+                                 (options.lowercase ? CHAR_SETS.lowercase : '');
+
+                const addRequired = (chars, optionName) => {
+                    if (!options[optionName]) return;
+                    let filtered = chars;
+                    if (options.avoidAmbiguous) {
+                        filtered = filtered.split('').filter(c => !AMBIGUOUS_CHARS.includes(c)).join('');
+                    }
+                    if (options.excludeChars) {
+                        const excluded = new Set(options.excludeChars.split(''));
+                        filtered = filtered.split('').filter(c => !excluded.has(c)).join('');
+                    }
+                    if (filtered.length > 0) {
+                        required.push(filtered[secureRandom(filtered.length)]);
+                    }
+                };
+
+                addRequired(CHAR_SETS.uppercase, 'uppercase');
+                addRequired(CHAR_SETS.lowercase, 'lowercase');
+                addRequired(CHAR_SETS.numbers, 'numbers');
+                addRequired(CHAR_SETS.symbols, 'symbols');
+
+                // Generate remaining characters
+                let password = [];
+                const remaining = options.length - required.length;
+
+                for (let i = 0; i < remaining; i++) {
+                    let char;
+                    let attempts = 0;
+                    do {
+                        char = pool[secureRandom(pool.length)];
+                        attempts++;
+                    } while (
+                        options.noConsecutive && 
+                        password.length > 0 && 
+                        password[password.length - 1] === char &&
+                        attempts < 100
+                    );
+                    password.push(char);
+                }
+
+                // Combine and shuffle
+                password = secureShuffle([...required, ...password]);
+
+                // Ensure first character is a letter if required
+                if (options.beginLetter && letterPool.length > 0) {
+                    const firstCharIndex = password.findIndex(c => letterPool.includes(c));
+                    if (firstCharIndex > 0) {
+                        [password[0], password[firstCharIndex]] = [password[firstCharIndex], password[0]];
+                    } else if (firstCharIndex === -1) {
+                        let letterPoolFiltered = letterPool;
+                        if (options.avoidAmbiguous) {
+                            letterPoolFiltered = letterPoolFiltered.split('').filter(c => !AMBIGUOUS_CHARS.includes(c)).join('');
+                        }
+                        if (letterPoolFiltered.length > 0) {
+                            password[0] = letterPoolFiltered[secureRandom(letterPoolFiltered.length)];
+                        }
+                    }
+                }
+
+                // Apply no consecutive filter to final password
+                if (options.noConsecutive) {
+                    for (let i = 1; i < password.length; i++) {
+                        if (password[i] === password[i - 1]) {
+                            let newChar;
+                            let attempts = 0;
+                            do {
+                                newChar = pool[secureRandom(pool.length)];
+                                attempts++;
+                            } while ((newChar === password[i - 1] || (i < password.length - 1 && newChar === password[i + 1])) && attempts < 100);
+                            password[i] = newChar;
+                        }
+                    }
+                }
+
+                const passwordStr = password.join('');
+                state.currentPassword = passwordStr;
+
+                displayPassword(passwordStr);
+                
+                const entropy = calculateEntropy(passwordStr, pool.length);
+                updateStrengthDisplay(passwordStr, entropy, 'password');
+                updateRequirements(passwordStr);
+                addToHistory(passwordStr, entropy);
+
+                return passwordStr;
+            }
+
+            function displayPassword(password) {
+                const el = $('password');
+                if (state.masked && password) {
+                    el.textContent = '•'.repeat(password.length);
+                    el.classList.add('masked');
+                } else {
+                    el.textContent = password || 'Click generate to create a password';
+                    el.classList.remove('masked');
+                }
+            }
+
+            // ==================== PASSPHRASE GENERATION ====================
+            function generatePassphrase() {
+                const words = [];
+                const wordCount = state.wordCount;
+                const capitalize = $('capitalizeWords').checked;
+                const addNum = $('addNumber').checked;
+                const addSym = $('addSymbol').checked;
+
+                for (let i = 0; i < wordCount; i++) {
+                    let word = WORDLIST[secureRandom(WORDLIST.length)];
+                    if (capitalize) {
+                        word = word.charAt(0).toUpperCase() + word.slice(1);
+                    }
+                    words.push(word);
+                }
+
+                let passphrase = words.join(state.separator);
+
+                if (addNum) {
+                    passphrase += secureRandom(10);
+                }
+
+                if (addSym) {
+                    const symbols = '!@#$%&*';
+                    passphrase += symbols[secureRandom(symbols.length)];
+                }
+
+                $('passphrase').textContent = passphrase;
+                
+                // Calculate entropy: log2(wordlist_size^word_count)
+                const baseEntropy = Math.floor(wordCount * Math.log2(WORDLIST.length));
+                const numEntropy = addNum ? Math.floor(Math.log2(10)) : 0;
+                const symEntropy = addSym ? Math.floor(Math.log2(7)) : 0;
+                const totalEntropy = baseEntropy + numEntropy + symEntropy;
+
+                updateStrengthDisplay(passphrase, totalEntropy, 'passphrase');
+
+                return passphrase;
+            }
+
+            // ==================== PIN GENERATION ====================
+            function generatePIN() {
+                const length = state.pinLength;
+                const avoidPatterns = $('avoidPinPatterns').checked;
+                let pin = '';
+                let attempts = 0;
+                const maxAttempts = 1000;
+
+                do {
+                    pin = '';
+                    for (let i = 0; i < length; i++) {
+                        pin += secureRandom(10).toString();
+                    }
+                    attempts++;
+                } while (avoidPatterns && hasWeakPattern(pin) && attempts < maxAttempts);
+
+                $('pinDisplay').textContent = pin;
+                return pin;
+            }
+
+            function hasWeakPattern(pin) {
+                // Check for all same digits
+                if (/^(.)\1+$/.test(pin)) return true;
+
+                // Check for sequential patterns
+                const sequences = ['0123456789', '9876543210'];
+                for (const seq of sequences) {
+                    if (seq.includes(pin)) return true;
+                }
+
+                // Check for repeating pairs
+                if (/^(.{2})\1+$/.test(pin)) return true;
+
+                return false;
+            }
+
+            // ==================== STRENGTH CALCULATION ====================
+            function calculateEntropy(password, poolSize) {
+                if (!password || poolSize <= 1) return 0;
+                return Math.floor(password.length * Math.log2(poolSize));
+            }
+
+            function estimateCrackTime(entropy) {
+                // Assume 10 billion guesses per second (high-end attack)
+                const guessesPerSecond = 10e9;
+                const combinations = Math.pow(2, entropy);
+                const seconds = combinations / guessesPerSecond / 2; // Average case
+
+                if (seconds < 1) return 'Instant';
+                if (seconds < 60) return `${Math.round(seconds)} seconds`;
+                if (seconds < 3600) return `${Math.round(seconds / 60)} minutes`;
+                if (seconds < 86400) return `${Math.round(seconds / 3600)} hours`;
+                if (seconds < 31536000) return `${Math.round(seconds / 86400)} days`;
+                if (seconds < 31536000 * 100) return `${Math.round(seconds / 31536000)} years`;
+                if (seconds < 31536000 * 1000000) return `${Math.round(seconds / 31536000 / 1000)} thousand years`;
+                if (seconds < 31536000 * 1e9) return `${Math.round(seconds / 31536000 / 1e6)} million years`;
+                return 'Billions of years';
+            }
+
+            function updateStrengthDisplay(password, entropy, type) {
+                const prefix = type === 'passphrase' ? 'passphrase' : '';
+                const barId = prefix ? 'passphraseStrengthBar' : 'strengthBar';
+                const textId = prefix ? 'passphraseStrengthText' : 'strengthText';
+                const entropyId = prefix ? 'passphraseEntropyBadge' : 'entropyBadge';
+                const crackId = prefix ? 'passphraseCrackTime' : 'crackTime';
+
+                let strength, color, segments;
+
+                if (entropy < 28) {
+                    strength = 'Very Weak';
+                    color = '#ef4444';
+                    segments = 1;
+                } else if (entropy < 36) {
+                    strength = 'Weak';
+                    color = '#f97316';
+                    segments = 2;
+                } else if (entropy < 60) {
+                    strength = 'Fair';
+                    color = '#f59e0b';
+                    segments = 3;
+                } else if (entropy < 80) {
+                    strength = 'Strong';
+                    color = '#22c55e';
+                    segments = 4;
+                } else {
+                    strength = 'Very Strong';
+                    color = '#10b981';
+                    segments = 5;
+                }
+
+                if (!password) {
+                    strength = '--';
+                    color = 'var(--border)';
+                    segments = 0;
+                }
+
+                const bar = $(barId);
+                const segs = bar.querySelectorAll('.strength-segment');
+                segs.forEach((seg, i) => {
+                    seg.style.background = i < segments ? color : 'var(--bg-primary)';
+                });
+
+                $(textId).textContent = strength;
+                $(textId).style.color = color;
+                $(entropyId).textContent = `${entropy} bits`;
+                $(crackId).textContent = password ? `Crack time: ${estimateCrackTime(entropy)}` : '--';
+            }
+
+            function updateRequirements(password) {
+                const checks = [
+                    { label: '12+ chars', pass: password.length >= 12 },
+                    { label: 'Uppercase', pass: /[A-Z]/.test(password) },
+                    { label: 'Lowercase', pass: /[a-z]/.test(password) },
+                    { label: 'Number', pass: /[0-9]/.test(password) },
+                    { label: 'Symbol', pass: /[^a-zA-Z0-9]/.test(password) },
+                    { label: 'No repeats', pass: !/(.)\1{2,}/.test(password) }
+                ];
+
+                $('reqList').innerHTML = checks.map(check => `
+                    <div class="req-item">
+                        <span class="req-icon ${check.pass ? 'pass' : 'fail'}">${check.pass ? '✓' : ''}</span>
+                        <span>${check.label}</span>
+                    </div>
+                `).join('');
+            }
+
+            // ==================== HISTORY ====================
+            function addToHistory(password, entropy) {
+                const strength = entropy < 36 ? 'Weak' : entropy < 60 ? 'Fair' : entropy < 80 ? 'Strong' : 'Very Strong';
+                const color = entropy < 36 ? '#ef4444' : entropy < 60 ? '#f59e0b' : '#22c55e';
+
+                state.history.unshift({ password, strength, color, entropy });
+                if (state.history.length > 20) state.history.pop();
+
+                renderHistory();
+            }
+
+            function renderHistory() {
+                const list = $('historyList');
+                $('historyCount').textContent = `${state.history.length} passwords this session`;
+
+                if (state.history.length === 0) {
+                    list.innerHTML = '<div class="history-empty">Generated passwords appear here (memory only, cleared on refresh)</div>';
+                    return;
+                }
+
+                list.innerHTML = state.history.map((item, i) => `
+                    <div class="history-item">
+                        <span class="history-password">${item.password}</span>
+                        <div class="history-meta">
+                            <span class="history-strength" style="background: ${item.color}20; color: ${item.color};">${item.strength}</span>
+                            <div class="history-actions">
+                                <button class="icon-btn history-copy" data-index="${i}" title="Copy">📋</button>
+                                <button class="icon-btn history-delete" data-index="${i}" title="Delete">🗑️</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+                // Add event listeners
+                list.querySelectorAll('.history-copy').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        copyText(state.history[parseInt(btn.dataset.index)].password);
+                    });
+                });
+
+                list.querySelectorAll('.history-delete').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        state.history.splice(parseInt(btn.dataset.index), 1);
+                        renderHistory();
+                    });
+                });
+            }
+
+            // ==================== ANALYZER ====================
+            function analyzePassword(password) {
+                if (!password) {
+                    $('analysisResults').style.display = 'none';
+                    return;
+                }
+
+                $('analysisResults').style.display = 'block';
+
+                const upper = (password.match(/[A-Z]/g) || []).length;
+                const lower = (password.match(/[a-z]/g) || []).length;
+                const nums = (password.match(/[0-9]/g) || []).length;
+                const syms = (password.match(/[^a-zA-Z0-9]/g) || []).length;
+                const unique = new Set(password.split('')).size;
+
+                // Calculate pool size based on character types present
+                let poolSize = 0;
+                if (upper > 0) poolSize += 26;
+                if (lower > 0) poolSize += 26;
+                if (nums > 0) poolSize += 10;
+                if (syms > 0) poolSize += 32;
+
+                const entropy = calculateEntropy(password, poolSize || 1);
+                const strength = entropy < 28 ? 'Very Weak' : entropy < 36 ? 'Weak' : entropy < 60 ? 'Fair' : entropy < 80 ? 'Strong' : 'Very Strong';
+                const crackTime = estimateCrackTime(entropy);
+
+                $('analysisEntropy').textContent = entropy;
+                $('analysisStrength').textContent = strength;
+                $('analysisLength').textContent = password.length;
+                $('analysisCrackTime').textContent = crackTime;
+
+                $('breakdownUpper').textContent = upper;
+                $('breakdownLower').textContent = lower;
+                $('breakdownNumbers').textContent = nums;
+                $('breakdownSymbols').textContent = syms;
+                $('breakdownUnique').textContent = unique;
+
+                // Generate warnings
+                const warnings = [];
+
+                if (password.length < 8) {
+                    warnings.push({ type: 'danger', text: 'Password is too short (minimum 8 characters)' });
+                } else if (password.length < 12) {
+                    warnings.push({ type: 'warning', text: 'Consider using 12+ characters for better security' });
+                }
+
+                if (COMMON_PASSWORDS.has(password.toLowerCase())) {
+                    warnings.push({ type: 'danger', text: 'This is a commonly used password - extremely weak!' });
+                }
+
+                if (/^(.)\1+$/.test(password)) {
+                    warnings.push({ type: 'danger', text: 'Password consists of repeating characters' });
+                }
+
+                if (/(.)\1{3,}/.test(password)) {
+                    warnings.push({ type: 'warning', text: 'Contains long sequences of repeated characters' });
+                }
+
+                if (/^[a-z]+$/i.test(password)) {
+                    warnings.push({ type: 'info', text: 'Add numbers and symbols for better security' });
+                }
+
+                if (/^[0-9]+$/.test(password)) {
+                    warnings.push({ type: 'warning', text: 'Numeric-only passwords are weak' });
+                }
+
+                if (/(012|123|234|345|456|567|678|789|890)/.test(password)) {
+                    warnings.push({ type: 'warning', text: 'Contains sequential number patterns' });
+                }
+
+                if (/(abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz)/i.test(password)) {
+                    warnings.push({ type: 'warning', text: 'Contains sequential letter patterns' });
+                }
+
+                if (/(qwerty|asdf|zxcv|wasd)/i.test(password)) {
+                    warnings.push({ type: 'warning', text: 'Contains keyboard pattern' });
+                }
+
+                if (unique < password.length * 0.5) {
+                    warnings.push({ type: 'info', text: 'Low character diversity - consider more unique characters' });
+                }
+
+                if (warnings.length === 0 && entropy >= 60) {
+                    warnings.push({ type: 'success', text: 'This password appears to be strong!' });
+                }
+
+                $('warningsList').innerHTML = warnings.map(w => `
+                    <div class="warning-item ${w.type}">${w.text}</div>
+                `).join('');
+            }
+
+            // ==================== CLIPBOARD ====================
+            async function copyText(text) {
+                if (!text) {
+                    showToast('Nothing to copy');
+                    return;
+                }
+
+                try {
+                    await navigator.clipboard.writeText(text);
+                    showToast('✓ Copied to clipboard', 'success');
+
+                    // Auto-clear clipboard after 30 seconds
+                    setTimeout(async () => {
+                        try {
+                            const current = await navigator.clipboard.readText();
+                            if (current === text) {
+                                await navigator.clipboard.writeText('');
+                            }
+                        } catch (e) {}
+                    }, 30000);
+                } catch (err) {
+                    // Fallback
+                    const ta = document.createElement('textarea');
+                    ta.value = text;
+                    ta.style.position = 'fixed';
+                    ta.style.left = '-9999px';
+                    document.body.appendChild(ta);
+                    ta.select();
+                    try {
+                        document.execCommand('copy');
+                        showToast('✓ Copied to clipboard', 'success');
+                    } catch (e) {
+                        showToast('Failed to copy');
+                    }
+                    document.body.removeChild(ta);
+                }
+            }
+
+            // ==================== BULK GENERATION ====================
+            function generateBulk() {
+                const count = Math.min(100, Math.max(1, parseInt($('bulkCount').value) || 10));
+                const passwords = [];
+
+                for (let i = 0; i < count; i++) {
+                    const options = getPasswordOptions();
+                    const pool = buildCharPool(options);
+                    if (pool.length === 0) continue;
+
+                    const required = [];
+                    if (options.uppercase) required.push(CHAR_SETS.uppercase[secureRandom(CHAR_SETS.uppercase.length)]);
+                    if (options.lowercase) required.push(CHAR_SETS.lowercase[secureRandom(CHAR_SETS.lowercase.length)]);
+                    if (options.numbers) required.push(CHAR_SETS.numbers[secureRandom(CHAR_SETS.numbers.length)]);
+                    if (options.symbols) required.push(CHAR_SETS.symbols[secureRandom(CHAR_SETS.symbols.length)]);
+
+                    const remaining = options.length - required.length;
+                    const chars = [];
+                    for (let j = 0; j < remaining; j++) {
+                        chars.push(pool[secureRandom(pool.length)]);
+                    }
+
+                    passwords.push(secureShuffle([...required, ...chars]).join(''));
+                }
+
+                $('bulkResults').textContent = passwords.join('\n');
+            }
+
+            // ==================== EVENT LISTENERS ====================
+            function setupEventListeners() {
+                // Tabs
+                $$('.tab').forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        $$('.tab').forEach(t => t.classList.remove('active'));
+                        $$('.tab-content').forEach(c => c.classList.remove('active'));
+                        tab.classList.add('active');
+                        $(`${tab.dataset.tab}-tab`).classList.add('active');
+                    });
+                });
+
+                // Password generation
+                $('generateBtn').addEventListener('click', generatePassword);
+                $('refreshBtn').addEventListener('click', generatePassword);
+                $('copyBtn').addEventListener('click', () => copyText(state.currentPassword));
+
+                // Toggle visibility
+                $('toggleMask').addEventListener('click', () => {
+                    state.masked = !state.masked;
+                    $('toggleMask').classList.toggle('active', state.masked);
+                    $('toggleMask').textContent = state.masked ? '🔒' : '👁️';
+                    displayPassword(state.currentPassword);
+                });
+
+                // Length controls
+                $('lengthRange').addEventListener('input', () => {
+                    $('lengthInput').value = $('lengthRange').value;
+                });
+                $('lengthInput').addEventListener('change', () => {
+                    const val = Math.min(128, Math.max(8, parseInt($('lengthInput').value) || 20));
+                    $('lengthInput').value = val;
+                    $('lengthRange').value = val;
+                });
+
+                // Character type toggles - ensure at least one is selected
+                const charToggles = ['uppercase', 'lowercase', 'numbers', 'symbols'];
+                charToggles.forEach(id => {
+                    $(id).addEventListener('change', () => {
+                        const checked = charToggles.filter(t => $(t).checked);
+                        if (checked.length === 1) {
+                            $(checked[0]).disabled = true;
+                        } else {
+                            charToggles.forEach(t => $(t).disabled = false);
+                        }
+                    });
+                });
+
+                // Passphrase
+                $('generatePassphraseBtn').addEventListener('click', generatePassphrase);
+                document.querySelector('.passphrase-refresh').addEventListener('click', generatePassphrase);
+                document.querySelector('.passphrase-copy').addEventListener('click', () => {
+                    copyText($('passphrase').textContent);
+                });
+
+                // Word count selector
+                $$('#wordCountSelector .word-count-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        $$('#wordCountSelector .word-count-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        state.wordCount = parseInt(btn.dataset.count);
+                    });
+                });
+
+                // Separator selector
+                $$('#separatorSelector .separator-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        $$('#separatorSelector .separator-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        state.separator = btn.dataset.sep;
+                    });
+                });
+
+                // PIN
+                $('generatePinBtn').addEventListener('click', generatePIN);
+                $('copyPinBtn').addEventListener('click', () => {
+                    copyText($('pinDisplay').textContent);
+                });
+
+                $$('#pinLengthSelector .pin-length-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        $$('#pinLengthSelector .pin-length-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        state.pinLength = parseInt(btn.dataset.length);
+                    });
+                });
+
+                // Analyzer
+                $('analyzeInput').addEventListener('input', (e) => {
+                    analyzePassword(e.target.value);
+                });
+
+                // History
+                $('clearHistory').addEventListener('click', () => {
+                    state.history = [];
+                    renderHistory();
+                    showToast('History cleared');
+                });
+
+                // Bulk modal
+                $('openBulkBtn').addEventListener('click', () => {
+                    $('bulkModal').classList.add('show');
+                });
+                $('closeBulkModal').addEventListener('click', () => {
+                    $('bulkModal').classList.remove('show');
+                });
+                $('generateBulkBtn').addEventListener('click', generateBulk);
+                $('copyAllBtn').addEventListener('click', () => {
+                    copyText($('bulkResults').textContent);
+                });
+
+                // Help modal
+                $('helpBtn').addEventListener('click', () => {
+                    $('helpModal').classList.add('show');
+                });
+                $('closeHelpModal').addEventListener('click', () => {
+                    $('helpModal').classList.remove('show');
+                });
+
+                // Close modals on overlay click
+                ['bulkModal', 'helpModal'].forEach(id => {
+                    $(id).addEventListener('click', (e) => {
+                        if (e.target === $(id)) {
+                            $(id).classList.remove('show');
+                        }
+                    });
+                });
+
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    // Don't trigger shortcuts when typing in inputs
+                    if (e.target.matches('input, textarea')) return;
+
+                    const key = e.key.toLowerCase();
+
+                    if (key === 'g' || (key === 'enter' && !e.target.matches('button'))) {
+                        e.preventDefault();
+                        generatePassword();
+                    } else if (key === 'r') {
+                        e.preventDefault();
+                        generatePassword();
+                    } else if (key === 'v') {
+                        e.preventDefault();
+                        $('toggleMask').click();
+                    } else if (key === '?' || (e.shiftKey && key === '/')) {
+                        e.preventDefault();
+                        $('helpModal').classList.add('show');
+                    } else if (key === 'escape') {
+                        $$('.modal-overlay').forEach(m => m.classList.remove('show'));
+                    } else if (key === 'arrowup') {
+                        e.preventDefault();
+                        const current = parseInt($('lengthInput').value);
+                        if (current < 128) {
+                            $('lengthInput').value = current + 1;
+                            $('lengthRange').value = current + 1;
+                        }
+                    } else if (key === 'arrowdown') {
+                        e.preventDefault();
+                        const current = parseInt($('lengthInput').value);
+                        if (current > 8) {
+                            $('lengthInput').value = current - 1;
+                            $('lengthRange').value = current - 1;
+                        }
+                    } else if ((e.ctrlKey || e.metaKey) && key === 'c' && !window.getSelection().toString()) {
+                        e.preventDefault();
+                        copyText(state.currentPassword);
+                    }
+                });
+
+                // Clear on page unload
+                window.addEventListener('beforeunload', () => {
+                    state.currentPassword = '';
+                    state.history = [];
+                    $('password').textContent = '';
+                    $('passphrase').textContent = '';
+                    $('pinDisplay').textContent = '';
+                    $('bulkResults').textContent = '';
+                });
+            }
+
+            // ==================== INITIALIZATION ====================
+            setupEventListeners();
+            generatePassword();
+            renderHistory();
+
+        })();
+    </script>
+</body>
+</html>
